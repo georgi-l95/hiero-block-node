@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    {
+      "address": "hedera-local-block-node",
+      "port": 8080
+    }
+  ],
+  "blockItemBatchSize": 256
+}

@@ -1,0 +1,23 @@
+{{- /*
+SPDX-License-Identifier: Apache-2.0
+*/}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hiero-block-node.fullname" . }}
+  labels:
+    app: {{ include "hiero-block-node.name" . }}
+    {{- include "hiero-block-node.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - name: metrics
+      port: {{ .Values.blockNode.health.metrics.port }}
+      targetPort: metrics
+  selector:
+    {{- include "hiero-block-node.selectorLabels" . | nindent 4 }}

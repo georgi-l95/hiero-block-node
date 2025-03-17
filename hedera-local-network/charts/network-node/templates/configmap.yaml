@@ -1,0 +1,536 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "network-node.fullname" . }}-config
+  labels:
+    {{- include "network-node.labels" . | nindent 4 }}
+data:
+  bootstrap.properties: |-
+    ledger.id=0x01
+    netty.mode=DEV
+    contracts.chainId=298
+    hedera.recordStream.logPeriod=1
+    balances.exportPeriodSecs=400
+    files.maxSizeKb=6144
+    contracts.precompile.atomicCryptoTransfer.enabled=true
+    contracts.systemContract.accountService.enabled=true
+    hedera.transaction.eip2930.enabled=true
+    accounts.blocklist.enabled=false
+    accounts.blocklist.path=data/config/evm-addresses-blocklist.csv
+    entities.unlimitedAutoAssociationsEnabled=true
+    scheduling.longTermEnabled=true
+    blockStream.writerMode=FILE_AND_GRPC
+  block-nodes.json: |-
+    {
+      "nodes": [
+        {
+          "address": "hedera-local-block-node",
+          "port": 8080
+        }
+      ],
+      "blockItemBatchSize": 256
+    }
+  api-permission.properties: |-
+    # Crypto
+    createAccount=0-*
+    cryptoTransfer=0-*
+    updateAccount=0-*
+    cryptoGetBalance=0-*
+    getAccountInfo=0-*
+    cryptoDelete=0-*
+    getAccountRecords=0-*
+    getTxRecordByTxID=0-*
+    getTransactionReceipts=0-*
+    approveAllowances=0-*
+    deleteAllowances=0-*
+    # File
+    createFile=0-*
+    updateFile=0-*
+    deleteFile=0-*
+    appendContent=0-*
+    getFileContent=0-*
+    getFileInfo=0-*
+    # Contract
+    createContract=0-*
+    updateContract=0-*
+    contractCallMethod=0-*
+    getContractInfo=0-*
+    contractCallLocalMethod=0-*
+    contractGetBytecode=0-*
+    getTxRecordByContractID=0-*
+    deleteContract=0-*
+    # Consensus
+    createTopic=0-*
+    updateTopic=0-*
+    deleteTopic=0-*
+    submitMessage=0-*
+    getTopicInfo=0-*
+    # Ethereum
+    ethereumTransaction=0-*
+    # Scheduling
+    scheduleCreate=0-*
+    scheduleSign=0-*
+    scheduleDelete=0-*
+    scheduleGetInfo=0-*
+    # Token
+    tokenCreate=0-*
+    tokenFreezeAccount=0-*
+    tokenUnfreezeAccount=0-*
+    tokenGrantKycToAccount=0-*
+    tokenRevokeKycFromAccount=0-*
+    tokenDelete=0-*
+    tokenMint=0-*
+    tokenBurn=0-*
+    tokenAccountWipe=0-*
+    tokenUpdate=0-*
+    tokenGetInfo=0-*
+    tokenGetNftInfo=0-*
+    tokenGetNftInfos=0-*
+    tokenGetAccountNftInfos=0-*
+    tokenAssociateToAccount=0-*
+    tokenDissociateFromAccount=0-*
+    tokenFeeScheduleUpdate=0-*
+    tokenPause=0-*
+    tokenUnpause=0-*
+    # Network 
+    getVersionInfo=0-*
+    networkGetExecutionTime=2-50
+    systemDelete=2-59
+    systemUndelete=2-60
+    freeze=2-58
+    getAccountDetails=2-50
+    # Util
+    utilPrng=0-*
+  application.properties: |-
+    autoRenew.targetTypes=
+    ledger.id=0x01
+    netty.mode=DEV
+    contracts.chainId=298
+    hedera.recordStream.logPeriod=1
+    balances.exportPeriodSecs=400
+    files.maxSizeKb=6144
+    contracts.precompile.atomicCryptoTransfer.enabled=true
+    contracts.systemContract.accountService.enabled=true
+    hedera.transaction.eip2930.enabled=true
+    accounts.blocklist.enabled=false
+    accounts.blocklist.path=data/config/evm-addresses-blocklist.csv
+    entities.unlimitedAutoAssociationsEnabled=true
+    scheduling.longTermEnabled=true
+    blockStream.writerMode=FILE_AND_GRPC
+  config.txt: |-
+    ###############################################################################################
+    # Configuration file, for automatically running multiple instances
+    ###############################################################################################
+    swirld, hedera
+    app, HederaNode.jar
+    address, 0, n0, node1, 1, network-node, 50111, network-node, 50111, 0.0.3
+    nextNodeId, 1
+  settings.txt: |-
+    checkSignedStateFromDisk,                      1
+    csvFileName,                                   MainNetStats
+    csvOutputFolder,                               data/stats
+    doUpnp,                                        false
+    enableEventStreaming,                          false
+    eventsLogDir,                                  /opt/hgcapp/eventsStreams
+    eventsLogPeriod,                               5
+    maxEventQueueForCons,                          1000
+    maxOutgoingSyncs,                              8
+    numConnections,                                1000
+    reconnect.active,                              1
+    reconnect.asyncStreamTimeoutMilliseconds,      60000
+    reconnect.reconnectWindowSeconds,              -1
+    showInternalStats,                             1
+    state.saveStatePeriod,                         900
+    state.signedStateDisk,                         5
+    throttle7extra,                                0.5
+    useLoopbackIp,                                 false
+    waitAtStartup,                                 false
+    jasperDb.iteratorInputBufferBytes,             16777216
+    prometheusEndpointEnabled,                     true
+    transactionMaxBytes,                           30720
+    event.creation.maxCreationRate,                20
+  log4j2.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!-- monitorInterval="600" , if any change to log level will be effective after 10 minute -->
+    <Configuration status="WARN" monitorInterval="600">
+      <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+          <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-4L %c{1} - %m{nolookups}%n"/>
+        </Console>
+        <RollingFile name="RollingFile" fileName="output/hgcaa.log"
+                    filePattern="output/hgcaa.log-%d{yyyy-MM-dd}-%i.log">
+          <PatternLayout>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-4L %c{1} - %m{nolookups}%n</pattern>
+          </PatternLayout>
+          <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+          </Policies>
+          <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="QueriesRollingFile" fileName="output/queries.log"
+                    filePattern="output/queries.log-%d{yyyy-MM-dd}-%i.log">
+          <BurstFilter level="INFO" rate="50" maxBurst="500"/>
+          <PatternLayout>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-4L %c{1} - %m{nolookups}%n</pattern>
+          </PatternLayout>
+          <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+          </Policies>
+          <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="fileLog" fileName="output/swirlds.log"
+                    filePattern="output/swirlds.log-%d{yyyy-MM-dd}-%i.log">
+          <PatternLayout>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-8sn %-5p %-16marker &lt;%t&gt; %c{1}: %msg{nolookups}%n</pattern>
+          </PatternLayout>
+          <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+          </Policies>
+          <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="vMapLog" fileName="output/swirlds-vmap.log"
+                    filePattern="output/swirlds-vmap.log-%d{yyyy-MM-dd}-%i.log">
+          <PatternLayout>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-8sn %-5p %-16marker &lt;%t&gt; %c{1}: %msg{nolookups}%n</pattern>
+          </PatternLayout>
+          <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+          </Policies>
+          <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+      </Appenders>
+      <Loggers>
+        <Root level="FATAL">
+          <AppenderRef ref="fileLog"/>
+        </Root>
+        <Logger name="com.swirlds" level="INFO" additivity="false">
+          <AppenderRef ref="fileLog">
+            <Filters>
+              <MarkerFilter marker="JASPER_DB" onMatch="DENY" onMismatch="NEUTRAL"/>
+              <MarkerFilter marker="VIRTUAL_MERKLE_STATS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
+          </AppenderRef>
+          <AppenderRef ref="vMapLog">
+            <Filters>
+              <MarkerFilter marker="JASPER_DB" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+              <MarkerFilter marker="VIRTUAL_MERKLE_STATS" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+              <MarkerFilter marker="DISABLED" onMatch="DENY" onMismatch="DENY" />
+            </Filters>
+          </AppenderRef>
+          <Filters>
+            <MarkerFilter marker="EXCEPTION" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="TESTING_EXCEPTIONS" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SOCKET_EXCEPTIONS" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="TCP_CONNECT_EXCEPTIONS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="INVALID_EVENT_ERROR" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SYNC_START" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SYNC_DONE" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SYNC_ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SYNC" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="HEARTBEAT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="CREATE_EVENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="INTAKE_EVENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="WATCH_EVENTS_SEND_REC" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="EVENT_SIG" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="EVENT_STREAM" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="EVENT_RESTART" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="STALE_EVENTS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="EVENT_PARSER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="EVENT_CONTENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="QUEUES" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="CERTIFICATES" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="LOCKS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="TIME_MEASURE" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="STATE_SIG_DIST" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="STATE_DELETER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="OBJECT_STREAM_DETAIL" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="OPENCL_INIT_EXCEPTIONS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="ADV_CRYPTO_SYSTEM" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="STARTUP" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="PLATFORM_STATUS" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="RECONNECT" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FREEZE" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="SNAPSHOT_MANAGER" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="STATE_TO_DISK" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="BETA_MIRROR_NODE" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_COPY" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_COPY_FROM" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_COPY_TO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_DEMO" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_COPY_FROM_DIFF" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FCM_COPY_TO_DIFF" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="FC_SERIALIZATION" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="MERKLE_FORCE_FLUSH" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="MERKLE_HASHING" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="MERKLE_GENERATION" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="MERKLE_LOCKS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="JASPER_DB" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="VIRTUAL_MERKLE_STATS" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+            <MarkerFilter marker="DISABLED" onMatch="DENY" onMismatch="DENY" />
+          </Filters>
+        </Logger>
+        <Logger name="com.hedera" level="info" additivity="false">
+          <AppenderRef ref="Console"/>
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.sigs" level="error" additivity="false">
+          <AppenderRef ref="Console"/>
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.queries.answering" level="warn" additivity="false">
+          <AppenderRef ref="QueriesRollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.netty" level="info" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.service" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.services" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.handler" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.utils.UnzipUtility" level="info" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.utils" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.hgcca.core" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.evm" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.initialization" level="warn" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="com.hedera.services.legacy.config" level="info" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+          <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.springframework" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="state" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="trie" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="net" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="execute" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="VM" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="pending" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="sync" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="wire" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="db" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="general" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="TCK-Test" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="org.hibernate" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="repository" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="blockchain" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="mine" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="blockqueue" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="rlp" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="java.nio" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="io.netty" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="discover" level="WARN" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Logger name="hsqldb.db" level="ERROR" additivity="false">
+          <AppenderRef ref="RollingFile"/>
+        </Logger>
+      </Loggers>
+    </Configuration>
+  s-public-node1.pem: |-
+    -----BEGIN CERTIFICATE-----
+    MIIDyjCCAjKgAwIBAgIJAP+re6l977TVMA0GCSqGSIb3DQEBDAUAMBIxEDAOBgNV
+    BAMTB3Mtbm9kZTAwIBcNMjIwMjE4MjE0NjE4WhgPMjEyMjAyMTgyMTQ2MThaMBIx
+    EDAOBgNVBAMTB3Mtbm9kZTAwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIB
+    gQChIAbyUnJCzX9TucT9XehpxWL/Ttikqzpilj8/gYi+ePJY6vQrnD4+j1hpcWBB
+    O793qt+vDZ/9hphLO8T7XwLhHorLbsZ+QmSt3KE//eg2dXjCeS/GrjJuezSFbSPw
+    JXT1onSBVgAy1zdJ2vnTMqeINRDmDqIiiJo7/Dvt81Dzo2yto5uUU5x0+4JlZ4vV
+    wUj7yRaa3Kz2cZuS7o1CqdL4kjzE/jtJTEZ/TpiipJ4KDvWqQzy+xDi6olauYaBZ
+    DOTmfQs/5fLamtkMJuIp0o1nlFaXjWVzVz67RiObrUq/q0/+ZOpKOXxrxfcXXhrD
+    ZIjxfGdzte2TQV5XxBxs2IZtvRI2AGIznLFU2FrRrs0ddgoJQdgOKP4kYDOoaNu8
+    iXXzYEQx/OmvkdxCVAqwSxu+wh81918wr28FyJhkKThuK0Ob/S/VkSyCYAgB6cCF
+    fxZeiH8iM9wsCYuhJnsFnbii23FP5QZo2/CTYEpd88IyFGcjIRzlhVJjj66fwGSn
+    8JsCAwEAAaMhMB8wHQYDVR0OBBYEFOUxC65CvzsXSJyn3Jx9/Ampi6zQMA0GCSqG
+    SIb3DQEBDAUAA4IBgQCSE7uf1UwX0OdVqUvHxOdWZs33fuF9lmnuApw1Inn/hKiZ
+    Fb8jDKSoypfTiz8GgVu3KU/XlWHP2HMO2+jbmEG8CV40G4yBkNZVWdAKeLz6ZKYq
+    ge0zO7vkCIXZ3MAAGKdL70xGshZdRYRl9U5GnNlSToDzJBM0DGSH3x0iRHaoM02d
+    r6Zi8554TwGciT/CCwbZlZx5hxPL+Y6WKE3jHNihjLasQDQQTSJ/U/0AZ9nLdDE/
+    ldgHOmIMzO5S5doXhbEie5ePdf8WCwVgmQM0NfaorbqgmLs4/DTekDrMNrMOHmb0
+    2qhq/ISgrI+QoKVcwgTm6ztLYXvMj89le8p35MIN0LuOBOsKkNJvsj39RJKIIhSg
+    hzaLpquv+VtgpNLSZcTHWsQRk8izboFgnHcGpC2daFIuEWJBXJACMLM0t3f3oi+x
+    E8iDtHUSZbSuD3dk+zpk48iMxbtfmGfhlEuw6D8Fr4mdLlLTZC6424pPZaah30LB
+    eDHO2B4MrlbnU2xsv6I=
+    -----END CERTIFICATE-----
+  s-private-node1.pem: |-
+    -----BEGIN PRIVATE KEY-----
+    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
+    g08CtWCJbIa6Vma1ft0K5bvw
+    -----END PRIVATE KEY-----
+  hedera.crt: |-
+    -----BEGIN CERTIFICATE-----
+    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
+    qxD6cDDvXHUriw==
+    -----END CERTIFICATE-----
+  hedera.key: |-
+    -----BEGIN PRIVATE KEY-----
+    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
+    TJ2llEjO54rp2QqDlW1mxbmZwuj3ppQ=
+    -----END PRIVATE KEY-----

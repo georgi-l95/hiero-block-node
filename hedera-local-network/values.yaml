@@ -1,0 +1,117 @@
+# Global values shared across all charts
+global:
+  env: {}
+  image: {}
+  podAnnotations: {}
+
+# Block Node specific values
+block-node:
+  image:
+    repository: ghcr.io/hiero-ledger/hiero-block-node
+    tag: 0.7.0-SNAPSHOT
+  service:
+    type: ClusterIP
+  block-node:
+    config:
+      JAVA_OPTS: "-Xms16G -Xmx16G"
+      BLOCKNODE_STORAGE_ROOT_PATH: "/app/storage"
+      VERSION: "0.7.0-SNAPSHOT"
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "2"
+    limits:
+      memory: "6Gi"
+      cpu: "4"
+
+# Network Node specific values
+network-node:
+  image:
+    repository: gcr.io/hedera-registry/consensus-node
+    tag: 0.60.0-alpha.2
+  service:
+    type: ClusterIP
+  env:
+    JAVA_HEAP_MIN: "256m"
+    JAVA_HEAP_MAX: "2g"
+    JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -Xlog:gc*:gc.log"
+    CONSENSUS_NODE_ID: "0"
+  resources:
+    requests:
+      memory: "8Gi"
+      cpu: "2"
+    limits:
+      memory: "12Gi"
+      cpu: "4"
+  securityContext:
+    runAsUser: 0  # Run as root
+    runAsGroup: 0
+    privileged: true
+  podSecurityContext:
+    fsGroup: 0
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    accountBalances:
+      size: 1Gi
+      mountPath: /opt/hgcapp/accountBalances
+    recordStreams:
+      size: 1Gi
+      mountPath: /opt/hgcapp/recordStreams
+    logs:
+      size: 1Gi
+      mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/output
+    config:
+      mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/config
+    block-nodes:
+      mountPath: /opt/hgcapp/data/config/block-nodes.json
+    keys:
+      mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/keys
+    stats:
+      size: 1Gi
+      mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/stats
+  podAnnotations:
+    container.seccomp.security.alpha.kubernetes.io/network-node: unconfined
+    container.apparmor.security.beta.kubernetes.io/network-node: unconfined
+
+# Monitor specific values
+monitor:
+  image:
+    registry: gcr.io
+    repository: mirrornode/hedera-mirror-monitor
+    tag: 0.124.0-rc1
+  service:
+    type: ClusterIP
+  config:
+    hedera:
+      mirror:
+        monitor:
+          publish:
+            scenarios:
+              pinger:
+                properties:
+                  amount: 1
+                  maxTransactionFee: 10000
+                  senderAccountId: 0.0.2
+                  recipientAccountId: 0.0.55
+                  transferTypes:
+                    - CRYPTO
+                receiptPercent: 1
+                tps: 10
+                type: CRYPTO_TRANSFER
+          subscribe:
+            grpc:
+              hcs:
+                enabled: false
+            rest:
+              transactionId:
+                enabled: false
+                samplePercent: 1
+          network: OTHER
+          nodes:
+            - accountId: 0.0.3
+              host: hedera-local-network-node
+              nodeId: 1
+          operator:
+            accountId: 0.0.2
+            privateKey: 302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137

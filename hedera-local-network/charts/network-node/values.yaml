@@ -1,0 +1,60 @@
+image:
+  repository: gcr.io/hedera-registry/consensus-node
+  tag: 0.60.0-alpha.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  ports:
+    - name: node
+      port: 50211
+      targetPort: 50211
+    - name: node-alt
+      port: 50212
+      targetPort: 50212
+    - name: metrics
+      port: 9999
+      targetPort: 9999
+
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
+
+env:
+  JAVA_HEAP_MIN: "256m"
+  JAVA_HEAP_MAX: "2g"
+  JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xlog:gc*:gc.log"
+  CONSENSUS_NODE_ID: "0"
+
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accountBalances:
+    size: 1Gi
+    mountPath: /opt/hgcapp/accountBalances
+  recordStreams:
+    size: 1Gi
+    mountPath: /opt/hgcapp/recordStreams
+  logs:
+    size: 1Gi
+    mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/output
+  config:
+    mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/config
+  keys:
+    mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/keys
+  stats:
+    size: 1Gi
+    mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/stats
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

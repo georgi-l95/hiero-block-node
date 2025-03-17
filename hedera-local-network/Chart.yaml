@@ -1,0 +1,18 @@
+apiVersion: v2
+name: hedera-local-network
+description: A Helm chart for deploying Block-Node, Network-Node, and Monitor in the same network
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: block-node-helm-chart
+    version: "0.7.0-SNAPSHOT"  # Use the actual version from the Chart.yaml
+    repository: "file://charts/block-node-server"
+    alias: block-node
+  - name: network-node
+    version: "0.1.0"  # Use the version you specified in the network-node Chart.yaml
+    repository: "file://charts/network-node"
+  - name: hedera-mirror-monitor
+    version: "0.126.0-SNAPSHOT"  # Use the actual version from the Chart.yaml
+    repository: "file://charts/hedera-mirror-monitor"
+    alias: monitor

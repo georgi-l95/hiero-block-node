@@ -1,0 +1,118 @@
+{{- /*
+SPDX-License-Identifier: Apache-2.0
+*/}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hiero-block-node.fullname" . }}
+  labels:
+    {{- include "hiero-block-node.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hiero-block-node.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hiero-block-node.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hiero-block-node.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: logging-config
+          configMap:
+            name: {{ include "hiero-block-node.fullname" . }}-logging-config
+        - name: archive-storage
+          persistentVolumeClaim:
+            claimName: {{ if .Values.blockNode.persistence.archive.create }}{{ include "hiero-block-node.fullname" . }}-archive{{ else }}{{ .Values.blockNode.persistence.archive.existingClaim }}{{ end }}
+        - name: live-storage
+          persistentVolumeClaim:
+            claimName: {{ if .Values.blockNode.persistence.live.create }}{{ include "hiero-block-node.fullname" . }}-live{{ else }}{{ .Values.blockNode.persistence.live.existingClaim }}{{ end }}
+        - name: unverified-ephemeral-storage
+          emptyDir: {}
+      initContainers:
+        - name: init-storage-dirs
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /live-pvc/live-data && \
+              chown 2000:2000 /live-pvc/live-data && \
+              chmod 700 /live-pvc/live-data && \
+              mkdir -p /archive-pvc/archive-data && \
+              chown 2000:2000 /archive-pvc/archive-data && \
+              chmod 700 /archive-pvc/archive-data
+          volumeMounts:
+            - name: live-storage
+              mountPath: /live-pvc
+            - name: archive-storage
+              mountPath: /archive-pvc
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: {{ .Values.service.port }}
+            protocol: TCP
+          - name: metrics
+            containerPort: 9999
+            protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: {{ include "hiero-block-node.fullname" . }}-config
+          - secretRef:
+              name: {{ include "hiero-block-node.fullname" . }}-secret
+        volumeMounts:
+          - name: logging-config
+            mountPath: /app/logs/config
+            readOnly: true
+          - name: archive-storage
+            mountPath: {{ .Values.blockNode.persistence.archive.mountPath }}
+            subPath: archive-data
+          - name: live-storage
+            mountPath: {{ .Values.blockNode.persistence.live.mountPath }}
+            subPath: live-data
+          - name: unverified-ephemeral-storage
+            mountPath: {{ .Values.blockNode.persistence.unverified.mountPath }}
+        {{- with  .Values.resources }}
+        resources:
+          requests:
+            memory: {{ .requests.memory }}
+            cpu: {{ .requests.cpu }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.blockNode.health.liveness.endpoint }}
+            port: {{ .Values.service.port }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.blockNode.health.readiness.endpoint }}
+            port: {{ .Values.service.port }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

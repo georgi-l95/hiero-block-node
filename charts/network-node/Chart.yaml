@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: 0.7.0-SNAPSHOT
+description: Hedera Network Node
+name: network-node
+version: 0.7.0-SNAPSHOT
+dependencies:
+  - name: block-node-server
+    version: "*"
+    repository: "file://../block-node-server"
+    condition: block-node-server.enabled 

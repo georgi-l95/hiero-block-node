@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "network-node.fullname" . }}
+  labels:
+    {{- include "network-node.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "network-node.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "network-node.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+              protocol: TCP
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: account-balances
+              mountPath: {{ .Values.persistence.accountBalances.mountPath }}
+            - name: record-streams
+              mountPath: {{ .Values.persistence.recordStreams.mountPath }}
+            - name: logs
+              mountPath: {{ .Values.persistence.logs.mountPath }}
+            - name: config
+              mountPath: {{ .Values.persistence.config.mountPath }}
+            - name: keys
+              mountPath: {{ .Values.persistence.keys.mountPath }}
+            - name: stats
+              mountPath: {{ .Values.persistence.stats.mountPath }}
+            {{- end }}
+            - name: config-files
+              mountPath: /opt/hgcapp/data/config/block-nodes.json
+              subPath: block-nodes.json
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/config/bootstrap.properties
+              subPath: bootstrap.properties
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/config/api-permission.properties
+              subPath: api-permission.properties
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/keys/s-public-node1.pem
+              subPath: s-public-node1.pem
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/keys/s-private-node1.pem
+              subPath: s-private-node1.pem
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/config.txt
+              subPath: config.txt
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/settings.txt
+              subPath: settings.txt
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/log4j2.xml
+              subPath: log4j2.xml
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/hedera.crt
+              subPath: hedera.crt
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/hedera.key
+              subPath: hedera.key
+            - name: config-files
+              mountPath: /opt/hgcapp/services-hedera/HapiApp2.0/data/config/application.properties
+              subPath: application.properties
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: account-balances
+          persistentVolumeClaim:
+            claimName: {{ include "network-node.fullname" . }}-account-balances
+        - name: record-streams
+          persistentVolumeClaim:
+            claimName: {{ include "network-node.fullname" . }}-record-streams
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ include "network-node.fullname" . }}-logs
+        - name: stats
+          persistentVolumeClaim:
+            claimName: {{ include "network-node.fullname" . }}-stats
+        {{- end }}
+        - name: config
+          emptyDir: {}
+        - name: keys
+          emptyDir: {}
+        - name: config-files
+          configMap:
+            name: {{ include "network-node.fullname" . }}-config

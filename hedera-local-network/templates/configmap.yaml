@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-shared-config
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  NETWORK_NODE_ENDPOINT: "hedera-local-network-node:50211"
+  BLOCK_NODE_ENDPOINT: "hedera-local-block-node:8080"
+  MONITOR_ENDPOINT: "hedera-local-monitor:8082"
+  RELEASE_NAME: "{{ .Release.Name }}"

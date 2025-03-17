@@ -1,0 +1,12 @@
+dependencies:
+- name: block-node-helm-chart
+  repository: file://charts/block-node-server
+  version: 0.7.0-SNAPSHOT
+- name: network-node
+  repository: file://charts/network-node
+  version: 0.1.0
+- name: hedera-mirror-monitor
+  repository: file://charts/hedera-mirror-monitor
+  version: 0.126.0-SNAPSHOT
+digest: sha256:31d1cbad3a448eeaede3e3258f4e71ac1e3d73b84be2a8f0de280018c85e8bc6
+generated: "2025-03-13T01:08:48.750957+02:00"
