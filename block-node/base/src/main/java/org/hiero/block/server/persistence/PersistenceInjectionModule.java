@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.block.server.persistence;
 
-import com.hedera.hapi.block.BlockItemUnparsed;
 import com.hedera.hapi.block.BlockUnparsed;
 import dagger.Module;
 import dagger.Provides;
@@ -41,6 +40,7 @@ import org.hiero.block.server.persistence.storage.write.AsyncBlockWriterFactory;
 import org.hiero.block.server.persistence.storage.write.AsyncNoOpWriterFactory;
 import org.hiero.block.server.persistence.storage.write.AsyncWriterExecutorFactory;
 import org.hiero.block.server.service.ServiceStatus;
+import org.hiero.hapi.block.node.BlockItemUnparsed;
 
 /** A Dagger module for providing dependencies for Persistence Module. */
 @Module
