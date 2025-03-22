@@ -149,9 +149,19 @@ message PublishStreamResponse {
     Acknowledgement acknowledgement = 1;
 
     /**
-     * A response sent when a stream ends.
+     * A response sent to request the Publisher end the current stream.
      */
-    EndOfStream status = 2;
+    EndOfStream end_stream = 2;
+
+    /**
+     * A response sent to request the Publisher skip the current block.
+     */
+    SkipBlock skip_block = 3;
+
+    /**
+     * A response sent to request the Publisher resend a skipped block.
+     */
+    ResendBlock resend_block = 4;
   }
 
   /**
@@ -159,42 +169,12 @@ message PublishStreamResponse {
    * or full block.
    */
   message Acknowledgement {
-    oneof acknowledgements {
-      /**
+    /**
        * A response type to acknowledge a full and complete block.
        * <p>
        * All block node implementations SHOULD acknowledge each block.
        */
-      BlockAcknowledgement block_ack = 1;
-
-      /**
-       * A response type to acknowledge a single `BlockItem`.<br/>
-       * This is an OPTIONAL message and implementations MAY choose to
-       * only acknowledge full blocks.
-       */
-      ItemAcknowledgement item_ack = 2;
-    }
-  }
-
-  /**
-   * Acknowledgement for a single repeated `BlockItem`.<br/>
-   * Most nodes are expected to implement this acknowledgement only for
-   * debugging and development purposes.
-   *
-   * If a node implements single item acknowledgement, the block node SHALL
-   * send one `ItemAcknowledgement` for each repeated `BlockItem` received
-   * and verified.
-   */
-  message ItemAcknowledgement {
-    /**
-     * A SHA2-384 hash of the `BlockItem`s received.
-     * <p>
-     * This field is REQUIRED.<br/>
-     * A source system MUST verify that this value matches its own internal
-     * calculated hash value, and MUST end the stream if the values do not
-     * match.
-     */
-    bytes items_hash = 1;
+    BlockAcknowledgement block_ack = 1;
   }
 
   /**
@@ -237,6 +217,60 @@ message PublishStreamResponse {
      * after that block.
      */
     bool block_already_exists = 3;
+  }
+
+  /**
+   * Message indicating the Publisher should skip the current block.
+   *
+   * Block-Nodes SHOULD only skip a block if that block is currently being
+   * received from another source.<br/>
+   * Publishers MUST stop sending the current block and resume with
+   * the block header for the next block, or else end the stream.<br/>
+   * A Publisher that receives this message SHALL subsequently receive an
+   * acknowledgement for the skipped block or SHALL receive a `ResendBlock`
+   * message.<br/>
+   * A Publisher asked to skip a block SHOULD NOT delay any subsequent
+   * block, but should send that block as soon as it is available.<br/>
+   * A Publisher MAY be asked to skip multiple blocks in succession, but
+   * SHOULD interpret that as the presence of another Publisher with a
+   * lower latency connection.<br/>
+   * A Publisher MAY choose to end the stream and send the block to a
+   * different Block-Node, rather than skip sending the block to the
+   * current Block-Node.
+   */
+  message SkipBlock {
+    /**
+     * The number of the _unverified_ block to skip.
+     * <p>
+     * This MUST match the block number of the `BlockHeader` most recently
+     * sent by the Publisher.
+     */
+    uint64 block_number = 1;
+  }
+
+  /**
+   * Message indicating the Publisher must resend from a specified block.
+   * A Publisher might resend the block, if it has that block available,
+   * or it might choose to end the stream if it has already received
+   * acknowledgement from a different trustworthy Block-Node.
+   *
+   * On receiving this message, a Publisher MUST resume sending blocks at
+   * the block number indicated, or else end the stream.<br/>
+   * This message SHALL only be sent following a `SkipBlock` message for a
+   * block that has not been acknowledged.<br/>
+   * A Block-Node SHALL NOT send a `ResendBlock` message for any block that
+   * is already acknowledged.<br/>
+   * A Publisher MAY choose to end the stream rather than resend the
+   * the requested block.
+   */
+  message ResendBlock {
+    /**
+     * The number of the _unverified_ block to re-send.
+     * <p>
+     * This SHALL be the block number one greater than the last block
+     * this Block-Node has successfully stored and verified.
+     */
+    uint64 block_number = 1;
   }
 
   /**

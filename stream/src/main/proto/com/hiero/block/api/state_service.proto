@@ -7,7 +7,6 @@ option java_package = "com.hiero.block.api.protoc";
 // <<<pbj.java_package = "com.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
-
 /**
  * A request to read a state snapshot.
  *
@@ -31,7 +30,7 @@ message StateSnapshotRequest {
    * A block node implementation MAY reject any request with a non-default
    * value for this field, but MUST clearly document that behavior.
    */
-  uint64 last_block_number = 2;
+  uint64 last_block_number = 1;
 
   /**
    * A boolean to request the latest available snapshot.
@@ -43,7 +42,7 @@ message StateSnapshotRequest {
    * A block node implementation MAY reject any request with that does _not_
    * set this field `true`, but MUST clearly document that behavior.
    */
-  bool retrieve_latest = 3;
+  bool retrieve_latest = 2;
 }
 
 /**
