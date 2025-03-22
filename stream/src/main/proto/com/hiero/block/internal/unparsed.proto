@@ -3,8 +3,9 @@ syntax = "proto3";
 
 package com.hiero.block.internal;
 
-option java_package = "com.hiero.block.internal.protoc";
-// <<<pbj.java_package = "com.hiero.block.internal">>> This comment is special code for setting PBJ Compiler java package
+// set the java packages for the generated classes to be com.hiero.block.api to avoid import confusion
+option java_package = "com.hiero.block.api.protoc";
+// <<<pbj.java_package = "com.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
 import "com/hiero/block/api/block_service.proto";
