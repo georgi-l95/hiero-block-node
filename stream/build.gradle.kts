@@ -28,7 +28,7 @@ val cloneHederaProtobufs =
         // uncomment below to use a specific branch
         // branch = "main"
 
-        // remove the block_service.proto file as we will specify a local version
+        // remove the block_service.proto file pulled from hedera-protobufs in favour of local version
         doLast {
             localCloneDirectory.file("block/block_service.proto").get().asFile.delete()
         }
@@ -39,14 +39,12 @@ sourceSets {
         pbj {
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("services") })
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("block") })
-            //).matching(exclude("block_service.proto"))
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("platform") })
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("streams") })
         }
         proto {
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("services") })
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("block") })
-                //.matching(exclude("block_service.proto"))
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("platform") })
             srcDir(cloneHederaProtobufs.flatMap { it.localCloneDirectory.dir("streams") })
         }
