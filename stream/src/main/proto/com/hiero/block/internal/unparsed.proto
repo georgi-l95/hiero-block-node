@@ -8,7 +8,8 @@ option java_package = "com.hiero.block.api.protoc";
 // <<<pbj.java_package = "com.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
-import "com/hiero/block/api/block_service.proto";
+import "com/hiero/block/api/block_access_service.proto";
+import "com/hiero/block/api/block_stream_service.proto";
 
 message PublishStreamRequestUnparsed {
   BlockItemSetUnparsed block_items = 1;
