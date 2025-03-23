@@ -28,10 +28,9 @@ val cloneHederaProtobufs =
         // uncomment below to use a specific branch
         // branch = "main"
 
-        // remove the block_service.proto file pulled from hedera-protobufs in favour of local version
-        doLast {
-            localCloneDirectory.file("block/block_service.proto").get().asFile.delete()
-        }
+        // remove the block_service.proto file pulled from hedera-protobufs in favour of local
+        // version
+        doLast { localCloneDirectory.file("block/block_service.proto").get().asFile.delete() }
     }
 
 sourceSets {

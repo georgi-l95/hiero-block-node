@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 syntax = "proto3";
 
-package com.hiero.block.api;
+package org.hiero.block.api;
 
-option java_package = "com.hiero.block.api.protoc";
-// <<<pbj.java_package = "com.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
+option java_package = "org.hiero.block.api.protoc";
+// <<<pbj.java_package = "org.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
 import "stream/block_item.proto";
@@ -470,7 +470,7 @@ message SubscribeStreamResponse {
      * <p>
      * The block node server SHALL end the stream following this message.
      */
-    com.hiero.block.api.SubscribeStreamResponseCode status = 1;
+    org.hiero.block.api.SubscribeStreamResponseCode status = 1;
 
     /**
      * A stream response item containing one or more `BlockItem`s.
