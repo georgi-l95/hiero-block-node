@@ -3,13 +3,13 @@ syntax = "proto3";
 
 package com.hiero.block.internal;
 
-// set the java packages for the generated classes to be com.hiero.block.api to avoid import confusion
-option java_package = "com.hiero.block.api.protoc";
-// <<<pbj.java_package = "com.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
+// set the java packages for the generated classes to be org.hiero.block.api to avoid import confusion
+option java_package = "org.hiero.block.api.protoc";
+// <<<pbj.java_package = "org.hiero.block.api">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
-import "com/hiero/block/api/block_access_service.proto";
-import "com/hiero/block/api/block_stream_service.proto";
+import "org/hiero/block/api/block_access_service.proto";
+import "org/hiero/block/api/block_stream_service.proto";
 
 message PublishStreamRequestUnparsed {
   BlockItemSetUnparsed block_items = 1;
@@ -22,7 +22,7 @@ message SubscribeStreamResponseUnparsed {
      * <p>
      * The block node server SHALL end the stream following this message.
      */
-    com.hiero.block.api.SubscribeStreamResponseCode status = 1;
+    org.hiero.block.api.SubscribeStreamResponseCode status = 1;
 
     /**
      * A stream response item containing one or more `BlockItem`s.
@@ -35,7 +35,7 @@ message SubscribeStreamResponseUnparsed {
 }
 
 message BlockResponseUnparsed {
-  com.hiero.block.api.BlockResponseCode status = 1;
+  org.hiero.block.api.BlockResponseCode status = 1;
   BlockUnparsed block = 2;
 }
 
