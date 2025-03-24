@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+name: "Local Node E2E Tests"
+
+on:
+  pull_request:
+    branches: [main, "release/**"]
+  push:
+    branches: [main, "release/**"]
+  release:
+    types: [published]
+    tags: ["v*"]
+
+jobs:
+  local-node-test:
+    uses: ./.github/workflows/local-node-test-reusable.yaml
+    with:
+      networkNodeTag: ""
+      mirrorNodeTag: ""
+      relayTag: ""
