@@ -12,7 +12,7 @@ on:
       - "release/**"
   tags:
     - "v*"
-  workflow_dispatch:
+  workflow_call:
     inputs:
       networkNodeTag:
         description: "Specify desired Network Node image tag"
