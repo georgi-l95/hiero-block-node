@@ -19,6 +19,23 @@ on:
         required: false
         type: string
         default: ""
+  workflow_call:
+    inputs:
+      networkNodeTag:
+        description: "Specify desired Network Node image tag"
+        required: false
+        type: string
+        default: ""
+      mirrorNodeTag:
+        description: "Specify desired Mirror-Node image tag"
+        required: false
+        type: string
+        default: ""
+      relayTag:
+        description: "Specify desired Hedera JSON-RPC Relay tag"
+        required: false
+        type: string
+        default: ""
 
 defaults:
   run:
