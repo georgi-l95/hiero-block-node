@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 name: "Local Node E2E Tests Reusable"
 
 on:
@@ -146,4 +147,4 @@ jobs:
       - name: Stop Local Node
         if: always()
         working-directory: local-node
-        run: npm run stop 
+        run: npm run stop
