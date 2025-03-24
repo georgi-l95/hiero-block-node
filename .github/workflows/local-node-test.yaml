@@ -2,16 +2,30 @@
 name: "Local Node E2E Tests"
 
 on:
+  pull_request:
+    branches:
+      - "main"
+      - "release/**"
   push:
     branches:
-      - main
-      - release/*
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+      - "main"
+      - "release/**"
+  tags:
+    - "v*"
   workflow_dispatch:
+    inputs:
+      networkNodeTag:
+        description: "Specify desired Network Node image tag"
+        required: false
+        default: ""
+      mirrorNodeTag:
+        description: "Specify desired Mirror-Node image tag"
+        required: false
+        default: ""
+      relayTag:
+        description: "Specify desired Hedera JSON-RPC Relay tag"
+        required: false
+        default: ""
 
 defaults:
   run:
@@ -94,7 +108,7 @@ jobs:
 
       - name: Start Local Node
         working-directory: local-node
-        run: npm run start:block-node -- --verbose=trace
+        run: npm run start:block-node -- --verbose=trace --network-tag=${{inputs.networkNodeTag}} --mirror-tag=${{inputs.mirrorNodeTag}} --relay-tag=${{inputs.relayTag}}
 
       - name: Checkout Hedera Smart Contracts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
