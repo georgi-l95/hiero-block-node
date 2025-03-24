@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-name: "Local Node E2E Tests Reusable"
+name: "Local Node E2E Tests"
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       networkNodeTag:
         description: "Specify desired Network Node image tag"
