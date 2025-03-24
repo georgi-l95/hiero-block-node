@@ -3,8 +3,12 @@ name: "Local Node E2E Tests"
 
 on:
   pull_request:
+    branches: [main, "release/**"]
   push:
-  tags:
+    branches: [main, "release/**"]
+  release:
+    types: [published]
+    tags: ["v*"]
 
 jobs:
   local-node-test:
